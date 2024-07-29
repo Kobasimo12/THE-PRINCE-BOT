@@ -1,28 +1,41 @@
-import {GoogleGenerativeAI} from '@google/generative-ai'
-import displayLoadingScreen from '../lib/loading.js'
-const genAI = new GoogleGenerativeAI('AIzaSyBWozNQdyPr6q5D7U1Izfl3BArjnNfwGuA');
+import fetch from 'node-fetch';
 
-
-let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  try {
-    if (!text) throw `Hey👋🏻.. I am gemini Google's advance ai, How may I help you?`
-    m.react('🪩')
-    await displayLoadingScreen(conn, m.chat)
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    const prompt = text
-
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const textt = response.text();
-    m.reply(textt)
-  } catch (error) {
-    console.error(error);
-    m.reply('Oops! Something went wrong. , we are trying had to fix it asap');
+let handler = async (m, { text, conn, usedPrefix, command }) => {
+  if (!text && !(m.quoted && m.quoted.text)) {
+    throw `❇️𝙀𝙭𝙖𝙢𝙥𝙡𝙚:\n *_${usedPrefix + command} What is islam?_*`;
   }
-}
-handler.help = ['gemini <text>']
-handler.tags = ['tools']
-handler.command = ['gemini', 'gm'];
 
-export default handler
+  if (!text && m.quoted && m.quoted.text) {
+    text = m.quoted.text;
+  }
+  try {
+    m.react(rwait)
+    conn.sendPresenceUpdate('composing', m.chat);
+    const prompt = encodeURIComponent(text);
+
+    const guru1 = await fetch(global.API('fgmods', '/api/info/gemini', { prompt }, 'apikey'));
+    try {
+      let response = guru1;
+      let data = await response.json();
+      let result = data.result;
+      if (!result) {   
+        throw new Error('No valid JSON response from the API');
+      }
+      m.react(done);
+      // You were missing the part where you send the result back to the user
+      m.reply(result);
+    } catch (error) {
+      console.error('Error:', error);
+      throw `*ERROR*`;
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    throw `*ERROR*`;
+  }
+};
+
+handler.help = ['gemini <text>'];
+handler.tags = ['tools'];
+handler.command = ['gemini'];
+
+export default handler;
